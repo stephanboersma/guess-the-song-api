@@ -1,0 +1,6 @@
+.env
+__pycache__
+.coverage
+htmlcov
+serviceAccountKey.json
+.DS_Store
