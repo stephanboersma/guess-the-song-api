@@ -3,7 +3,7 @@ import firebase_admin
 from firebase_admin import firestore, auth
 from dataclasses import asdict
 
-from wotsong.core.models.BaseEntity import BaseEntity, DocumentReference
+from wotsong.core.models import BaseEntity, DocumentReference
 
 
 firebase_app = firebase_admin.initialize_app()
@@ -26,7 +26,12 @@ class Firestore:
 
     def set_document(self, entity: BaseEntity):
         document_reference = entity.get_document_reference()
-        return self.db.collection(document_reference.collection_path).document(entity.id).set(entity.to_dict())
+        ref = self.db.collection(document_reference.collection_path).document(entity.id).set(entity.to_dict())
+        return entity
+
+    def update_document(self, cls: Type[BaseEntity], ref: DocumentReference, payload):
+        self.db.collection(ref.collection_path).document(ref.id).set(payload,merge=True)
+        return self.get_document(cls, ref)
 
     def delete_document(self, entity: BaseEntity):
         document_reference = entity.get_document_reference()
