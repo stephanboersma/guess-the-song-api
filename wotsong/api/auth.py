@@ -18,6 +18,7 @@ def get_authed_user(user_id):
         db.session.commit()
     return make_response(jsonify(user.as_camel_dict()), 200)
 
+
 @api.route('/me', methods=["POST"])
 @require_auth()
 def update_authed_user(user_id):
