@@ -1,41 +1,33 @@
 import logging
-from flask import current_app, jsonify, make_response, request
+from flask import jsonify, make_response, request
 from wotsong.api import api
 from wotsong.api.utils.route_wrappers import require_auth
-from wotsong.core.models.User import User
+from wotsong.core.database import create_entity, db, update_entity
+from wotsong.core.database.User import User, UserSchema
 from wotsong.core.services.firebase import Firestore
-import wotsong.core
+from wotsong.core.utils import camel_to_snake, validate_schema
+from flask_cors import cross_origin
 
-db: Firestore = wotsong.core.db
 
 @api.route('/me', methods=["GET"])
 @require_auth()
 def get_authed_user(user_id):
-    try:
-        user: User = db.get_document(User, User.get_document_reference(user_id))
-        return make_response(jsonify(user.to_dict()), 200)
-    except:
-        return make_response(jsonify({"message": "failed"}), 400)
+    user: User = User.query.get(user_id)
+    if not user:
+        user = create_entity(User, {"id": user_id})
+        db.session.commit()
+    return make_response(jsonify(user.as_camel_dict()), 200)
 
-@api.route('/me', methods=["PUT"])
+@api.route('/me', methods=["POST"])
 @require_auth()
 def update_authed_user(user_id):
+    payload = camel_to_snake(request.json)
+    user = User.query.get_or_404(user_id)
     try:
-        print(request.json)
-        user: User = db.update_document(User, User.get_document_reference(user_id), request.json)
-        return make_response(jsonify(user.to_dict()), 200)
+        update_entity(user, payload)
+        db.session.commit()
+        user = User.query.get(user_id)
+        return make_response(jsonify(user.as_camel_dict()), 200)
     except Exception as e:
         logging.error(str(e))
         return make_response(jsonify({"message": "failed"}), 400)
-
-@api.route('/users', methods=["POST"])
-@require_auth()
-def create_user(user_id):
-    body = request.json
-    user = User(user_id, body["displayName"], body["email"])
-    try:
-        user: User = db.set_document(user)
-        return make_response(jsonify(user.to_dict()), 201)
-    except:
-        return make_response(jsonify({"message": "failed"}), 400)
-    

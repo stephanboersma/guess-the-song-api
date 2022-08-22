@@ -1,15 +1,14 @@
-from flask import Flask, jsonify, make_response
+from venv import create
+from flask import Flask
 from dotenv import load_dotenv
-
-from wotsong.core.services.firebase import Firestore
+from flask_sqlalchemy import SQLAlchemy
 
 load_dotenv()
 import logging
 from os import environ as env, getpid
 from flask_cors import CORS
-import wotsong.core
-wotsong.core.db = Firestore()
 from .api import api
+from .core.database import init_db
 
 logging.basicConfig(level=logging.DEBUG,
                    format='[%(asctime)s]: {} %(levelname)s %(message)s'.format(getpid()),
@@ -19,15 +18,23 @@ logging.basicConfig(level=logging.DEBUG,
 logger = logging.getLogger()
 logger.info(f'Starting app in {env["APP_ENV"]} environment')
 
-
-app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "*"}})
-
-
-app.register_blueprint(api)
-print(app.url_map)
+def create_app():
+    app = Flask(__name__)
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///wotsong.db'
+    register_extensions(app)
+    return app
 
 
-@app.route('/')
-def hello_world():
-   return 'Hello, World!'
+def register_extensions(app):
+    init_db(app)
+    app.register_blueprint(api)
+    CORS(app, resources={r"/api/*": {"origins": "*"}})
+    print(app.url_map)
+    
+    
+    
+    
+
+
+
+
