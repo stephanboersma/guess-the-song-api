@@ -4,3 +4,4 @@ __pycache__
 htmlcov
 serviceAccountKey.json
 .DS_Store
+wotsong.db
