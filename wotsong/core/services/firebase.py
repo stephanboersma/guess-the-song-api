@@ -5,6 +5,8 @@ import firebase_admin
 from firebase_admin import firestore, auth
 from dataclasses import asdict, dataclass
 
+from wotsong.core.utils import snake_to_camel
+
 firebase_app = firebase_admin.initialize_app()
 
 class DocumentNotFound(Exception):
@@ -26,9 +28,9 @@ class FirebaseEntity(Protocol):
 
     def to_dict(self) -> dict:
         dictionary:dict = asdict(self)
-        return {
+        return snake_to_camel({
             key: dictionary.get(key) for key in dictionary if "__" not in key
-        }
+        })
 
 @dataclass
 class DocumentReference:

@@ -20,15 +20,15 @@ logger.info(f'Starting app in {env["APP_ENV"]} environment')
 
 def create_app():
     app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///wotsong.db'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://admin:admin@localhost:5432/wotsong'
     register_extensions(app)
     return app
 
 
 def register_extensions(app):
     init_db(app)
+    CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
     app.register_blueprint(api)
-    CORS(app, resources={r"/api/*": {"origins": "*"}})
     print(app.url_map)
     
     

@@ -1,3 +1,4 @@
+import base64
 import re
 from typing import Type
 from marshmallow import Schema
@@ -12,3 +13,8 @@ def validate_schema(schema: Type[Schema], payload: dict):
     errors = schema.validate(schema(),payload)
     if errors:
         raise AssertionError(str(errors))
+
+def base64_encode(text: str) -> str:
+    bytes = text.encode("ascii")
+    base64_bytes = base64.b64encode(bytes)
+    return base64_bytes.decode("ascii")

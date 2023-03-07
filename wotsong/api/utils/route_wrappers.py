@@ -20,7 +20,6 @@ def require_auth():
                 return make_response(jsonify({"message": "A valid token is missing!"}), 401)
             try:
                 token = token.replace("Bearer ", "")
-                print(token)
                 user_id = firestore_db.verify_id_token(token)
             except:
                 return make_response(jsonify({"message": "A valid token is missing!"}), 401)

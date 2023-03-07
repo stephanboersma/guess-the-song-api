@@ -8,7 +8,7 @@ from marshmallow import Schema
 firestore_db = Firestore()
 
 class BaseItem(Model, object):
-
+    __table_args__ = {"schema":"wotsong"}
     schema: Schema
 
     def as_dict(self):
@@ -27,7 +27,7 @@ db = SQLAlchemy(model_class=BaseItem)
 
 def init_db(app):
     db.init_app(app)
-    from .User import User
+    from .User import User, SpotifySecret
     with app.app_context():
         db.create_all()
 
